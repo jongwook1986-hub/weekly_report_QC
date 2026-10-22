@@ -558,8 +558,8 @@ tbody tr.isnew .wkcell .cat{background:var(--surface)}
  * 서버 연결 설정 — Supabase 대시보드 > Project Settings > API 에서 복사
  * 두 값이 비어 있으면 '체험 모드'(이 브라우저에만 저장)로 열립니다.
  * ===================================================================== */
-const SUPABASE_URL = "https://bybidmhwfrkpkudoevdg.supabase.co/rest/v1/";        // 예: "https://abcdefghijk.supabase.co"
-const SUPABASE_ANON_KEY = "sb_publishable_S12i30_ghKLgViL-QtGWKA_HwJ7KJrQ";   // anon public 키 (service_role 키는 절대 넣지 마세요)
+const SUPABASE_URL = "https://bybidmhwfrkpkudoevdg.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_S12i30_ghKLgViL-QtGWKA_HwJ7KJrQ";   // Publishable key(sb_publishable_…) 또는 anon public 키. Secret/service_role 키는 절대 넣지 마세요
 const TEAM = "quality";         // 같은 Supabase에 여러 팀을 둘 때 구분용 (구매팀은 "purchase")
 </script>
 <script>
@@ -1134,7 +1134,9 @@ const CONFIGURED=!!(SUPABASE_URL&&SUPABASE_ANON_KEY);
 const SEED={"lists":null,"items":[]};
 async function rest(path,opt){
   opt=opt||{};
-  const r=await fetch(SUPABASE_URL.replace(/\/$/,"")+"/rest/v1/"+path,Object.assign({},opt,{headers:Object.assign({apikey:SUPABASE_ANON_KEY,Authorization:"Bearer "+SUPABASE_ANON_KEY,"Content-Type":"application/json"},opt.headers||{})}));
+  const base=SUPABASE_URL.trim().replace(/\/+$/,"").replace(/\/rest\/v1$/,"");
+  const auth=SUPABASE_ANON_KEY.startsWith("sb_")?{}:{Authorization:"Bearer "+SUPABASE_ANON_KEY};
+  const r=await fetch(base+"/rest/v1/"+path,Object.assign({},opt,{headers:Object.assign({apikey:SUPABASE_ANON_KEY.trim(),"Content-Type":"application/json"},auth,opt.headers||{})}));
   if(!r.ok){const e=new Error((await r.text().catch(()=>""))||r.statusText);e.status=r.status;throw e}
   if(r.status===204)return null;
   const t=await r.text();return t?JSON.parse(t):null;
